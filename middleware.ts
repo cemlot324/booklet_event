@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { clerkMiddleware } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
-// Define routes that should be publicly accessible without Clerk authentication
 const publicRoutes = [
   '/',
   '/events/:id',
@@ -11,22 +10,22 @@ const publicRoutes = [
   '/api/uploadthing'
 ];
 
-// Function to check if a route should bypass Clerk middleware
+// Helper function to check if a route is public
 function isPublicRoute(pathname: string): boolean {
   return publicRoutes.some((route) => new RegExp(`^${route.replace(/:\w+/g, '[^/]+')}$`).test(pathname));
 }
 
-// Middleware handler
+// Middleware function
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // If the route is public, skip Clerk middleware
+  // Check if the route is public and bypass Clerk middleware if it is
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // Otherwise, apply Clerk middleware directly
-  return clerkMiddleware(req);
+  // If not a public route, use Clerk's middleware directly without passing `req`
+  return clerkMiddleware();
 }
 
 // Clerk matcher configuration
